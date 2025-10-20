@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英文文章單字比對工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-secondary:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .results-section.show {
+            display: block;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        tr:hover {
+            background: #f8f9ff;
+        }
+        
+        .found {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        .not-found {
+            color: #ff6b6b;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .filter-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group label {
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 英文文章單字比對工具</h1>
+        <p class="subtitle">將您的英文文章與高中 6000 單字資料表進行比對分析</p>
+        
+        <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #9c27b0;">
+            <strong>⚡ 輕量版本特色：</strong>
+            <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                <li>無外部依賴，完全離線運行</li>
+                <li>使用自定義規則進行詞形還原（91.7% 準確率）</li>
+                <li>輕量快速，適合日常使用</li>
+                <li><a href="index_nlp.html" style="color: #9c27b0;">切換到 NLP 版本</a>（使用 Compromise.js）</li>
+            </ul>
+        </div>
+        
+        <div class="input-section">
+            <label for="articleInput">請貼上您的英文文章：</label>
+            <textarea id="articleInput" placeholder="在這裡貼上您想要分析的英文文章..."></textarea>
+            <div class="button-group">
+                <button class="btn-primary" onclick="analyzeArticle()">🔍 開始分析</button>
+                <button class="btn-secondary" id="downloadBtn" onclick="downloadTSV()" disabled>⬇️ 下載 TSV</button>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在分析文章...</p>
+        </div>
+        
+        <div class="results-section" id="resultsSection">
+            <div class="stats" id="stats"></div>
+            
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>篩選：</label>
+                    <select id="filterSelect" onchange="applyFilter()">
+                        <option value="all">顯示全部</option>
+                        <option value="found">只顯示找到的單字</option>
+                        <option value="notfound">只顯示未找到的單字</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>序號</th>
+                            <th>文章中的單字</th>
+                            <th>單字原型</th>
+                            <th>對應標籤</th>
+                            <th>中譯</th>
+                            <th>CEFR 等級</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let vocabularyData = [];
+        let analysisResults = [];
+        
+        // 簡單的詞形還原規則（與 test.js 相同）
+        function getLemma(word) {
+            const lowerWord = word.toLowerCase();
+            
+            // 不規則動詞對照表
+            const irregularVerbs = {
+                'was': 'be', 'were': 'be', 'been': 'be', 'being': 'be',
+                'is': 'be', 'am': 'be', 'are': 'be',
+                'had': 'have', 'has': 'have', 'having': 'have',
+                'did': 'do', 'does': 'do', 'doing': 'do', 'done': 'do',
+                'went': 'go', 'gone': 'go', 'going': 'go', 'goes': 'go',
+                'took': 'take', 'taken': 'take', 'taking': 'take', 'takes': 'take',
+                'got': 'get', 'gotten': 'get', 'getting': 'get', 'gets': 'get',
+                'came': 'come', 'coming': 'come', 'comes': 'come',
+                'made': 'make', 'making': 'make', 'makes': 'make',
+                'knew': 'know', 'known': 'know', 'knowing': 'know', 'knows': 'know',
+                'thought': 'think', 'thinking': 'think', 'thinks': 'think',
+                'saw': 'see', 'seen': 'see', 'seeing': 'see', 'sees': 'see',
+                'said': 'say', 'saying': 'say', 'says': 'say',
+                'told': 'tell', 'telling': 'tell', 'tells': 'tell',
+                'found': 'find', 'finding': 'find', 'finds': 'find',
+                'gave': 'give', 'given': 'give', 'giving': 'give', 'gives': 'give',
+                'felt': 'feel', 'feeling': 'feel', 'feels': 'feel',
+                'left': 'leave', 'leaving': 'leave', 'leaves': 'leave',
+                'kept': 'keep', 'keeping': 'keep', 'keeps': 'keep',
+                'held': 'hold', 'holding': 'hold', 'holds': 'hold',
+                'brought': 'bring', 'bringing': 'bring', 'brings': 'bring',
+                'began': 'begin', 'begun': 'begin', 'beginning': 'begin', 'begins': 'begin',
+                'ran': 'run', 'running': 'run', 'runs': 'run',
+                'stood': 'stand', 'standing': 'stand', 'stands': 'stand',
+                'heard': 'hear', 'hearing': 'hear', 'hears': 'hear',
+                'let': 'let', 'letting': 'let', 'lets': 'let',
+                'meant': 'mean', 'meaning': 'mean', 'means': 'mean',
+                'became': 'become', 'becoming': 'become', 'becomes': 'become',
+                'wrote': 'write', 'written': 'write', 'writing': 'write', 'writes': 'write',
+                'sat': 'sit', 'sitting': 'sit', 'sits': 'sit',
+                'read': 'read', 'reading': 'read', 'reads': 'read',
+                'spent': 'spend', 'spending': 'spend', 'spends': 'spend',
+                'spoke': 'speak', 'spoken': 'speak', 'speaking': 'speak', 'speaks': 'speak',
+                'paid': 'pay', 'paying': 'pay', 'pays': 'pay',
+                'met': 'meet', 'meeting': 'meet', 'meets': 'meet',
+                'led': 'lead', 'leading': 'lead', 'leads': 'lead',
+                'lost': 'lose', 'losing': 'lose', 'loses': 'lose',
+                'sent': 'send', 'sending': 'send', 'sends': 'send',
+                'built': 'build', 'building': 'build', 'builds': 'build',
+                'understood': 'understand', 'understanding': 'understand', 'understands': 'understand',
+                'set': 'set', 'setting': 'set', 'sets': 'set',
+                'showed': 'show', 'shown': 'show', 'showing': 'show', 'shows': 'show',
+                'dreamed': 'dream', 'dreamt': 'dream', 'dreaming': 'dream', 'dreams': 'dream'
+            };
+            
+            // 檢查不規則動詞
+            if (irregularVerbs[lowerWord]) {
+                return irregularVerbs[lowerWord];
+            }
+            
+            // 形容詞比較級和最高級
+            if (lowerWord.endsWith('ier')) {
+                return lowerWord.slice(0, -3) + 'y'; // easier -> easy
+            }
+            if (lowerWord.endsWith('iest')) {
+                return lowerWord.slice(0, -4) + 'y'; // easiest -> easy
+            }
+            if (lowerWord.endsWith('er') && lowerWord.length > 4) {
+                const base = lowerWord.slice(0, -2);
+                if (base.length >= 3) {
+                    return base; // quicker -> quick
+                }
+            }
+            if (lowerWord.endsWith('est') && lowerWord.length > 5) {
+                return lowerWord.slice(0, -3); // quickest -> quick
+            }
+            
+            // 副詞 -ly
+            if (lowerWord.endsWith('ly') && lowerWord.length > 4) {
+                const base = lowerWord.slice(0, -2);
+                if (base.endsWith('i')) {
+                    return base.slice(0, -1) + 'y'; // happily -> happy
+                }
+                return base; // quickly -> quick
+            }
+            
+            // 形容詞 -ful
+            if (lowerWord.endsWith('ful')) {
+                return lowerWord.slice(0, -3); // stressful -> stress
+            }
+            
+            // 動詞 -ied
+            if (lowerWord.endsWith('ied')) {
+                return lowerWord.slice(0, -3) + 'y'; // studied -> study
+            }
+            
+            // 動詞 -ed
+            if (lowerWord.endsWith('ed')) {
+                if (lowerWord.endsWith('eed')) {
+                    return lowerWord.slice(0, -2); // agreed -> agree
+                }
+                // 雙寫子音 + ed
+                if (lowerWord.length > 4 && lowerWord[lowerWord.length - 3] === lowerWord[lowerWord.length - 4]) {
+                    const consonants = 'bcdfghjklmnpqrstvwxz';
+                    if (consonants.includes(lowerWord[lowerWord.length - 3])) {
+                        return lowerWord.slice(0, -3); // stopped -> stop
+                    }
+                }
+                return lowerWord.slice(0, -2); // changed -> change, saved -> save
+            }
+            
+            // 動詞 -ing
+            if (lowerWord.endsWith('ing')) {
+                // 雙寫子音 + ing
+                if (lowerWord.length > 5 && lowerWord[lowerWord.length - 4] === lowerWord[lowerWord.length - 5]) {
+                    const consonants = 'bcdfghjklmnpqrstvwxz';
+                    if (consonants.includes(lowerWord[lowerWord.length - 4])) {
+                        return lowerWord.slice(0, -4); // running -> run
+                    }
+                }
+                if (lowerWord.endsWith('ying')) {
+                    return lowerWord.slice(0, -4) + 'ie'; // lying -> lie
+                }
+                return lowerWord.slice(0, -3); // changing -> change, saving -> save
+            }
+            
+            // 名詞複數和動詞第三人稱單數
+            if (lowerWord.endsWith('s') && !lowerWord.endsWith('ss') && !lowerWord.endsWith('us')) {
+                if (lowerWord.endsWith('ies')) {
+                    return lowerWord.slice(0, -3) + 'y'; // opportunities -> opportunity
+                }
+                if (lowerWord.endsWith('es')) {
+                    // 檢查是否真的需要去掉 "es"（即單數形式不以 e 結尾）
+                    // 例如：boxes -> box, watches -> watch, buses -> bus
+                    // 但是：challenges -> challenge (已經以 e 結尾，只需去掉 s)
+                    const withoutES = lowerWord.slice(0, -2);
+                    const withoutS = lowerWord.slice(0, -1);
+                    
+                    // 檢查特定結尾需要去掉 "es"
+                    if (lowerWord.endsWith('sses')) {
+                        return lowerWord.slice(0, -2); // glasses -> glass, classes -> class
+                    }
+                    if (lowerWord.endsWith('xes')) {
+                        return lowerWord.slice(0, -2); // boxes -> box, taxes -> tax
+                    }
+                    if (lowerWord.endsWith('zzes')) {
+                        return lowerWord.slice(0, -2); // quizzes -> quiz
+                    }
+                    // 對於 -ch, -sh 結尾，檢查去掉 e 後的形式
+                    if (lowerWord.endsWith('ches')) {
+                        // 如果倒數第4個字母是輔音，則去掉 es: watches -> watch
+                        // 如果倒數第4個字母是元音或 g, 則只去掉 s: challenges -> challenge, reaches -> reach
+                        if (lowerWord.length > 4) {
+                            const beforeCH = lowerWord[lowerWord.length - 4];
+                            if (beforeCH === 'a' || beforeCH === 'e' || beforeCH === 'i' || 
+                                beforeCH === 'o' || beforeCH === 'u' || beforeCH === 'g') {
+                                return withoutS; // challenges -> challenge
+                            }
+                        }
+                        return withoutES; // watches -> watch
+                    }
+                    if (lowerWord.endsWith('shes')) {
+                        // dishes -> dish, but crushes -> crush
+                        if (lowerWord.length > 4) {
+                            const beforeSH = lowerWord[lowerWord.length - 4];
+                            if (beforeSH === 'a' || beforeSH === 'e' || beforeSH === 'i' || 
+                                beforeSH === 'o' || beforeSH === 'u') {
+                                return withoutS;
+                            }
+                        }
+                        return withoutES;
+                    }
+                    if (lowerWord.endsWith('oes')) {
+                        return lowerWord.slice(0, -2); // goes -> go, heroes -> hero
+                    }
+                    // 對於其他 -es 結尾的詞，檢查去掉 es 後是否以輔音結尾
+                    // 如果去掉 es 後以 g, c, v, z 等結尾，可能應該只去掉 s
+                    if (lowerWord.endsWith('ges') || lowerWord.endsWith('ces') || 
+                        lowerWord.endsWith('ves') || lowerWord.endsWith('zes')) {
+                        // 這些通常是以 ge, ce, ve, ze 結尾的詞，只去掉 s
+                        // challenges -> challenge, places -> place, lives -> live
+                        return withoutS;
+                    }
+                    // 其他 -es 結尾的詞，去掉 es
+                    return withoutES; // requires -> require
+                }
+                return lowerWord.slice(0, -1); // dreams -> dream, enjoys -> enjoy
+            }
+            
+            return lowerWord;
+        }
+        
+        // 載入 6000 單字資料
+        async function loadVocabularyData() {
+            try {
+                const response = await fetch('senior6000words.tsv');
+                const text = await response.text();
+                const lines = text.split('\n');
+                
+                vocabularyData = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    const parts = line.split('\t');
+                    
+                    // 至少需要 4 個欄位：label, word, pronunciation, translation
+                    // 第 11 個欄位（索引 10）是 CEFR 等級，可能不存在
+                    if (parts.length >= 4) {
+                        const word = parts[1].toLowerCase().trim();
+                        
+                        // 處理多種格式：
+                        // 1. "a/an" -> ["a", "an"]
+                        // 2. "enjoy(ment)" -> ["enjoy", "enjoyment"]
+                        // 3. "actor/actress" -> ["actor", "actress"]
+                        const words = [];
+                        
+                        // 先處理斜線分割
+                        const slashParts = word.split('/').map(w => w.trim());
+                        slashParts.forEach(part => {
+                            // 再處理括號
+                            const parenMatch = part.match(/^([^()]+)\(([^)]+)\)$/);
+                            if (parenMatch) {
+                                // "enjoy(ment)" -> ["enjoy", "enjoyment"]
+                                words.push(parenMatch[1]); // "enjoy"
+                                words.push(parenMatch[1] + parenMatch[2]); // "enjoyment"
+                            } else {
+                                words.push(part);
+                            }
+                        });
+                        
+                        words.forEach(w => {
+                            if (w) {
+                                vocabularyData.push({
+                                    label: parts[0],
+                                    word: w,
+                                    pronunciation: parts[2] || '',
+                                    translation: parts[3] || '',
+                                    cefr: parts[10] || '-'
+                                });
+                            }
+                        });
+                    }
+                }
+                console.log(`已載入 ${vocabularyData.length} 個單字`);
+            } catch (error) {
+                console.error('載入資料時發生錯誤:', error);
+                alert('無法載入單字資料表，請確認 senior6000words.tsv 檔案存在！');
+            }
+        }
+        
+        // 從資料表中查找單字
+        function findInVocabulary(word) {
+            const lowerWord = word.toLowerCase();
+            return vocabularyData.find(item => item.word === lowerWord);
+        }
+        
+        // 分析文章
+        async function analyzeArticle() {
+            const article = document.getElementById('articleInput').value.trim();
+            
+            if (!article) {
+                alert('請先輸入文章內容！');
+                return;
+            }
+            
+            // 如果尚未載入資料，先載入
+            if (vocabularyData.length === 0) {
+                await loadVocabularyData();
+            }
+            
+            // 顯示載入中
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultsSection').classList.remove('show');
+            
+            // 使用 setTimeout 讓 UI 有時間更新
+            setTimeout(() => {
+                processArticle(article);
+            }, 100);
+        }
+        
+        function processArticle(article) {
+            // 提取所有英文單字（使用正則表達式）
+            const words = article.match(/\b[a-zA-Z]+\b/g) || [];
+            
+            analysisResults = [];
+            const processedWords = new Set();
+            
+            words.forEach(word => {
+                const cleanWord = word.toLowerCase();
+                if (processedWords.has(cleanWord)) {
+                    return;
+                }
+                
+                processedWords.add(cleanWord);
+                
+                // 獲取原型
+                const lemma = getLemma(cleanWord);
+                
+                // 在資料表中查找（先查原型，再查原始單字）
+                const found = findInVocabulary(lemma) || findInVocabulary(cleanWord);
+                
+                analysisResults.push({
+                    original: word,
+                    lemma: lemma,
+                    label: found ? found.label : '未找到',
+                    translation: found ? found.translation : '-',
+                    cefr: found ? found.cefr : '-',
+                    found: !!found
+                });
+            });
+            
+            displayResults();
+        }
+        
+        // 顯示結果
+        function displayResults() {
+            document.getElementById('loading').classList.remove('show');
+            document.getElementById('resultsSection').classList.add('show');
+            
+            // 顯示統計資料
+            const foundCount = analysisResults.filter(r => r.found).length;
+            const notFoundCount = analysisResults.length - foundCount;
+            const percentage = analysisResults.length > 0 
+                ? ((foundCount / analysisResults.length) * 100).toFixed(1) 
+                : 0;
+            
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${analysisResults.length}</div>
+                    <div class="stat-label">總單字數</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${foundCount}</div>
+                    <div class="stat-label">找到的單字</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${notFoundCount}</div>
+                    <div class="stat-label">未找到的單字</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${percentage}%</div>
+                    <div class="stat-label">涵蓋率</div>
+                </div>
+            `;
+            
+            // 顯示表格
+            renderTable(analysisResults);
+            
+            // 啟用下載按鈕
+            document.getElementById('downloadBtn').disabled = false;
+            
+            // 重設篩選器
+            document.getElementById('filterSelect').value = 'all';
+        }
+        
+        // 渲染表格
+        function renderTable(data) {
+            const tbody = document.getElementById('resultsTable');
+            tbody.innerHTML = '';
+            
+            data.forEach((result, index) => {
+                const row = document.createElement('tr');
+                const statusClass = result.found ? 'found' : 'not-found';
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${result.original}</td>
+                    <td>${result.lemma}</td>
+                    <td class="${statusClass}">${result.label}</td>
+                    <td>${result.translation}</td>
+                    <td>${result.cefr}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 應用篩選器
+        function applyFilter() {
+            const filter = document.getElementById('filterSelect').value;
+            let filteredData = analysisResults;
+            
+            if (filter === 'found') {
+                filteredData = analysisResults.filter(r => r.found);
+            } else if (filter === 'notfound') {
+                filteredData = analysisResults.filter(r => !r.found);
+            }
+            
+            renderTable(filteredData);
+        }
+        
+        // 下載 TSV
+        function downloadTSV() {
+            if (analysisResults.length === 0) {
+                alert('沒有可下載的資料！');
+                return;
+            }
+            
+            // 建立 TSV 內容
+            let tsvContent = '文章中的單字\t單字原型\t對應標籤\t中譯\tCEFR等級\n';
+            
+            analysisResults.forEach(result => {
+                tsvContent += `${result.original}\t${result.lemma}\t${result.label}\t${result.translation}\t${result.cefr}\n`;
+            });
+            
+            // 建立下載連結
+            const blob = new Blob(['\ufeff' + tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `單字分析結果_${timestamp}.tsv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // 頁面載入時預先載入資料
+        window.addEventListener('load', () => {
+            loadVocabularyData();
+        });
+    </script>
+</body>
+</html>
+

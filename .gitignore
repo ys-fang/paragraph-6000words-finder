@@ -1,0 +1,12 @@
+# 測試結果檔案
+測試結果_*.tsv
+單字分析結果_*.tsv
+
+# 測試檔案
+test_para.txt
+test.js
+
+# 臨時檔案
+*.tmp
+.DS_Store
+
