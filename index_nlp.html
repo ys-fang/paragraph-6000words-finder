@@ -414,14 +414,14 @@
                 <div class="quick-actions">
                     <button class="btn-quick" onclick="selectAll()">✅ 全選</button>
                     <button class="btn-quick" onclick="deselectAll()">❌ 取消全選</button>
-                    <button class="btn-quick" onclick="selectByLevel('L1')">選擇 L1</button>
-                    <button class="btn-quick" onclick="selectByLevel('L2')">選擇 L2</button>
-                    <button class="btn-quick" onclick="selectByLevel('L3')">選擇 L3</button>
-                    <button class="btn-quick" onclick="selectByLevel('L4')">選擇 L4</button>
-                    <button class="btn-quick" onclick="selectByLevel('L5')">選擇 L5</button>
-                    <button class="btn-quick" onclick="selectByLevel('L6')">選擇 L6</button>
-                    <button class="btn-quick" onclick="selectFound()">只選找到的</button>
-                    <button class="btn-quick" onclick="selectNotFound()">只選未找到的</button>
+                    <button class="btn-quick" onclick="toggleSelectByLevel('L1')">切換 L1</button>
+                    <button class="btn-quick" onclick="toggleSelectByLevel('L2')">切換 L2</button>
+                    <button class="btn-quick" onclick="toggleSelectByLevel('L3')">切換 L3</button>
+                    <button class="btn-quick" onclick="toggleSelectByLevel('L4')">切換 L4</button>
+                    <button class="btn-quick" onclick="toggleSelectByLevel('L5')">切換 L5</button>
+                    <button class="btn-quick" onclick="toggleSelectByLevel('L6')">切換 L6</button>
+                    <button class="btn-quick" onclick="toggleSelectFound()">切換找到的</button>
+                    <button class="btn-quick" onclick="toggleSelectNotFound()">切換未找到的</button>
                 </div>
                 <div style="margin-top: 15px;">
                     <button class="btn-secondary" id="downloadBtn" onclick="downloadTSV()" disabled>⬇️ 下載選擇的單字為 TSV</button>
@@ -811,7 +811,51 @@
             }
         }
         
-        // 按等級選擇
+        // 切換等級選擇（複選模式）
+        function toggleSelectByLevel(level) {
+            // 檢查該等級是否全部已選
+            const levelWords = analysisResults.filter(result => getSimplifiedLabel(result.label) === level);
+            const allSelected = levelWords.length > 0 && levelWords.every(result => result.selected);
+            
+            // 如果全部已選，則取消選擇；否則全部選上
+            analysisResults.forEach(result => {
+                if (getSimplifiedLabel(result.label) === level) {
+                    result.selected = !allSelected;
+                }
+            });
+            renderTable(analysisResults);
+            updateSelectionStats();
+        }
+        
+        // 切換「找到的」選擇狀態（複選模式）
+        function toggleSelectFound() {
+            const foundWords = analysisResults.filter(result => result.found);
+            const allSelected = foundWords.length > 0 && foundWords.every(result => result.selected);
+            
+            analysisResults.forEach(result => {
+                if (result.found) {
+                    result.selected = !allSelected;
+                }
+            });
+            renderTable(analysisResults);
+            updateSelectionStats();
+        }
+        
+        // 切換「未找到的」選擇狀態（複選模式）
+        function toggleSelectNotFound() {
+            const notFoundWords = analysisResults.filter(result => !result.found);
+            const allSelected = notFoundWords.length > 0 && notFoundWords.every(result => result.selected);
+            
+            analysisResults.forEach(result => {
+                if (!result.found) {
+                    result.selected = !allSelected;
+                }
+            });
+            renderTable(analysisResults);
+            updateSelectionStats();
+        }
+        
+        // 舊的單選函數（保留供參考，但不再使用）
         function selectByLevel(level) {
             deselectAll();
             analysisResults.forEach(result => {
@@ -823,7 +867,6 @@
             updateSelectionStats();
         }
         
-        // 只選找到的
         function selectFound() {
             deselectAll();
             analysisResults.forEach(result => {
@@ -835,7 +878,6 @@
             updateSelectionStats();
         }
         
-        // 只選未找到的
         function selectNotFound() {
             deselectAll();
             analysisResults.forEach(result => {
