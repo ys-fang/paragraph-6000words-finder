@@ -1,10 +1,13 @@
 # 測試結果檔案
 測試結果_*.tsv
 單字分析結果_*.tsv
+單字差異分析報告.md
+比較結果_*.tsv
 
 # 測試檔案
 test_para.txt
 test.js
+compare_vocab.js
 
 # 臨時檔案
 *.tmp
